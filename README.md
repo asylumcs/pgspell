@@ -16,14 +16,18 @@ in HTML for display in a browser, where color-coding may be used.
 As a standalone program use this command line:
 
     python3 pgspell.py -i sourcefile.txt -o report.htm
+    
+If running standalone, you may also add:
 
-You may also include "-v" to get verbose reports.
+    -g goodwords.txt    to add a "good words" file, typ. per user
+    -s suppwords.txt    to add a supplemental words file, typ. per project
 
 ### In the UWB
 
 This is one of the tests available in the
 [UWB](https://uwb.pglaf.org).
-It uses the Linux aspell dictionary.
+In the UWB it uses the Linux aspell dictionary and
+runs without the -g or -s modifiers.
 You must have a user account on the pglaf server to use the UWB.
 
 ## Requirements
