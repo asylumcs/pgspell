@@ -27,22 +27,26 @@ import tempfile
 from dataclasses import dataclass
 import regex as re  # for unicode support  (pip install regex)
 
+
 def fatal(msg):
-    """ fatal error: print message and exit """
+    """fatal error: print message and exit"""
     print("FATAL: {}".format(msg))
     sys.exit(1)
 
+
 @dataclass
 class W:
-    """ one object of this class for every unique word in book """
+    """one object of this class for every unique word in book"""
+
     word: str  # the word
     where: set()  # all line numbers with this word
     checkas: str  # how it will be checked
 
+
 def aggregate(b):
-    """ aggregation
-        load the aggregation file
-        combine this data set
+    """aggregation
+    load the aggregation file
+    combine this data set
     """
     hdata = {}
     t1 = open("aggregate.txt", "r", encoding="UTF-8").read()
@@ -66,6 +70,7 @@ def aggregate(b):
     for word in hdata:
         f.write("{},{}\n".format(word, hdata[word]))
     f.close()
+
 
 def loadFile(fn):
     """
@@ -92,14 +97,14 @@ def loadFile(fn):
 
 
 def loadFromFile(fn):
-    """ load word file, protect internal punctuation, return as a list """
+    """load word file, protect internal punctuation, return as a list"""
     t32 = loadFile(fn)
     for i, _ in enumerate(t32):
         t32[i] = re.sub(r"--", r"≣≣", t32[i])  # old-style long dash (must be in pairs)
 
         # t32[i] = re.sub(
         #    r"([\p{L}\-])[’']([\p{L}\-])", r"\1ᒽ\2", t32[i]
-        #)  # internal apostrophe
+        # )  # internal apostrophe
         # t32[i] = re.sub(r"([\p{L}\-])[’']([\p{L}\-])", r"\1ᒽ\2", t32[i])  # if overlapped
         t32[i] = re.sub(r"[’']", r"ᒽ", t32[i])  # any apostrophe
 
@@ -116,10 +121,10 @@ def loadFromFile(fn):
 
 
 def getWordSet(b):
-    """ build a dict of word objects
-        keeps all apostrophes, even though a closing apos might be a close
-        single quote. later, try to replace the apos with a letter (typ. 'g')
-        to make a word.
+    """build a dict of word objects
+    keeps all apostrophes, even though a closing apos might be a close
+    single quote. later, try to replace the apos with a letter (typ. 'g')
+    to make a word.
     """
     a = b[:]  # local writeable copy
     wo = dict()  # word objects
@@ -145,6 +150,7 @@ def getWordSet(b):
             else:  # not there, create an object for this word
                 wo[word] = W(word, {i}, "")
     return wo
+
 
 wb = []  # list of lines of text, no modifications
 gwl = {}  # set of good words, per project
@@ -255,7 +261,7 @@ for item in c:
 # convert closing "inᒽ" to "ing" for checkas words
 for key in wd:
     if key.endswith("inᒽ"):
-        wd[key].checkas = key[:-1]+'g'
+        wd[key].checkas = key[:-1] + "g"
 
 # reduce by dictionary lookup
 
@@ -268,7 +274,11 @@ for key in wd:
     t = re.sub(r"ᗮ", "-", t)
     f1.write(t + "\n")
 f1.close()
-os.system("cat {} | aspell list --lang en,en_GB --encoding utf-8 > {}".format(f1.name, f2.name))
+os.system(
+    "cat {} | aspell list --lang en,en_GB --encoding utf-8 > {}".format(
+        f1.name, f2.name
+    )
+)
 os.unlink(f1.name)
 
 # get that list of unapproved words back
@@ -297,7 +307,7 @@ c = set()
 for key in wd2:
     if key.endswith("in"):
         testw1 = key[:-2]
-        if len(testw1) > 2 and  testw1[-1] == testw1[-2]:
+        if len(testw1) > 2 and testw1[-1] == testw1[-2]:
             testw1 = testw1[:-1]
         testw2 = key + "g"
         cmd = 'echo "{} {}" | aspell --list'.format(testw1, testw2)
@@ -309,13 +319,15 @@ for item in c:
     del wd2[item]
 
 # generate the report to file
-f = open(args["outfile"], "w", encoding='utf-8')
+f = open(args["outfile"], "w", encoding="utf-8")
 # f.write("\uFEFF")  # BOM
 f.write("<pre>")
 f.write("pgspell run report\n")
-f.write(f"run started: {str(datetime.datetime.now())}\n");
-f.write("source file: {}\n".format(os.path.basename(args['infile'])))
-f.write(f"<span style='background-color:#FFFFDD'>close this window to return to the UWB.</span>\n");
+f.write(f"run started: {str(datetime.datetime.now())}\n")
+f.write("source file: {}\n".format(os.path.basename(args["infile"])))
+f.write(
+    f"<span style='background-color:#FFFFDD'>close this window to return to the UWB.</span>\n"
+)
 f.write("\n")
 
 for key, _ in sorted(wd2.items(), key=lambda x: x[0]):
